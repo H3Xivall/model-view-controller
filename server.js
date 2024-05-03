@@ -31,4 +31,27 @@ app.use(session({
     cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 7 // 1 week
     }
-}))
+}));
+
+// Import and use routes
+const homeRoutes = require('./controllers/home');
+const dashboardRoutes = require('./controllers/dashboard');
+const postRoutes = require('./controllers/api/post');
+const commentRoutes = require('./controllers/api/comment');
+
+app.use('/', homeRoutes);
+app.use('/dashboard', dashboardRoutes);
+app.use('/api/post', postRoutes);
+app.use('/api/comment', commentRoutes);
+
+// Start server
+(async () => {
+    try {
+        await sequelize.sync();
+        app.listen(process.env.PORT, () => {
+            console.log(`Server listening on port ${process.env.PORT}`);
+        });
+    } catch (err) {
+        console.log(`Server failed to start: ${err}`);
+    }
+});
