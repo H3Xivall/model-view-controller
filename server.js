@@ -12,6 +12,8 @@ const exphbs = require('express-handlebars');
 // Load environment variables from .env file
 dotenv.config();
 
+seedDatabase();
+
 //Create an instance of the Express application
 const app = express();
 
@@ -21,25 +23,28 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
 // Set up session middleware
-const sessionStore = new sequelizeStore({ db: sequelize });
 app.use(session({
     secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUinitialized: false,
     cookie: {
+        // Set max 20 minutes
         maxAge: 20 * 60 * 1000
-    }
+    },
+    resave: false,
+    saveUninitialized: true,
+    store: new sequelizeStore({
+        db: sequelize
+    })
 }));
 
 // Set up Handlebars
-app.engine('handlebars', exphbs({ defaultLayout:'main' }));
+app.engine('handlebars', exphbs.engine);
 app.set('view engine', 'handlebars');
 
 // Set up routes
-app.use('/api', apiRoutes);
-app.use('/', homeRoutes);
-app.use('/dashboard', dashboardRoutes);
-app.use('/user', userRoutes);
+// app.use('/api', apiRoutes);
+// app.use('/', homeRoutes);
+// app.use('/dashboard', dashboardRoutes);
+// app.use('/user', userRoutes);
 
 // Connect to the database and sync models
 async function startServer() {
@@ -47,12 +52,12 @@ async function startServer() {
         await sequelize.authenticate();
         await sequelize.sync();
         console.log(`Database connection has been established successfully at ${process.env.DB_HOST}:${process.env.DB_PORT}`);
-        await seedDatabase();
+        // await seedDatabase();
 
         // Start the server
         const HOST = process.env.HOST || '0.0.0.0';
         const PORT = process.env.PORT || 3000;
-        app.list(PORT, () => {
+        app.listen(PORT, () => {
             console.log(`Server is running on http://${HOST}:${PORT}`);
         });
     } catch (err) {
@@ -75,4 +80,5 @@ const seedDatabase = async () => {
 }
 
 // Start the server
+
 startServer();

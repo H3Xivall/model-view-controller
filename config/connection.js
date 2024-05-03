@@ -11,9 +11,7 @@ const sequelize = new Sequelize(
         dialect: 'mysql',
         port: process.env.DB_PORT,
         logging: false,
-        define: {
-            timestamps: false
-        }
+        
     }
 );
 module.exports = sequelize;

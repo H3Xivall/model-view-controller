@@ -1,6 +1,7 @@
 -- Delete the database if it exists
 DROP DATABASE IF EXISTS tech_blog;
 CREATE DATABASE tech_blog;
+USE tech_blog;
 
 -- Create the User table
 CREATE TABLE User (
