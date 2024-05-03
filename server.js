@@ -47,6 +47,7 @@ async function startServer() {
         await sequelize.authenticate();
         await sequelize.sync();
         console.log(`Database connection has been established successfully at ${process.env.DB_HOST}:${process.env.DB_PORT}`);
+        await seedDatabase();
 
         // Start the server
         const HOST = process.env.HOST || '0.0.0.0';
@@ -56,6 +57,20 @@ async function startServer() {
         });
     } catch (err) {
         console.error('Unable to connect to the database:', err);
+    }
+}
+
+// Execute the schema and seed the database with random data
+const seedDatabase = async () => {
+    try {
+        const schemaSQL = require('fs').readFileSync('./db/schema/schema.sql', 'utf8');
+        await sequelize.query(schemaSQL);
+
+        await require('./db/seeds/seeds.js')(sequelize);
+
+        console.log('Database schema and seed data successfully loaded!');
+    } catch (err) {
+        console.error('Error seeding database:', err);
     }
 }
 
