@@ -1,57 +1,63 @@
 const express = require('express');
 const session = require('express-session');
-const MySQLStore = require('express-mysql-session')(session.Store);
-const path = require('path');
-const sequelize = require('./db/connection');
+const sequelizeStore = require('connect-session-sequelize')(session.Store);
+const dotenv = require('dotenv');
+const sequelize = require('./config/connection');
+const apiRoutes = require('./controllers/api');
+const homeRoutes = require('./controllers/homeRoutes');
+const dashboardRoutes = require('./controllers/dashboardRoutes');
+const userRoutes = require('./controllers/userRoutes');
+const exphbs = require('express-handlebars');
+
+// Load environment variables from .env file
+dotenv.config();
+
+//Create an instance of the Express application
 const app = express();
 
-// Set up view engine
-app.set('view engine', 'handlebars');
-app.engine('handlebars', require('express-handlebars').engine());
-
-// Set up static files
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.urlencoded({ extended: false }));
+// Configure middleware
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static('public'));
 
-// Set up session
-const sessionStore = new MySQLStore({
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME
-    }, sequelize);
-
+// Set up session middleware
+const sessionStore = new sequelizeStore({ db: sequelize });
 app.use(session({
     secret: process.env.SESSION_SECRET,
-    store: sessionStore,
     resave: false,
-    saveUninitialized: false,
+    saveUinitialized: false,
     cookie: {
-        maxAge: 1000 * 60 * 60 * 24 * 7 // 1 week
+        maxAge: 20 * 60 * 1000
     }
 }));
 
-// Import and use routes
-const homeRoutes = require('./controllers/home');
-const dashboardRoutes = require('./controllers/dashboard');
-const postRoutes = require('./controllers/api/post');
-const commentRoutes = require('./controllers/api/comment');
+// Set up Handlebars
+app.engine('handlebars', exphbs({ defaultLayout:'main' }));
+app.set('view engine', 'handlebars');
 
+// Set up routes
+app.use('/api', apiRoutes);
 app.use('/', homeRoutes);
 app.use('/dashboard', dashboardRoutes);
-app.use('/api/post', postRoutes);
-app.use('/api/comment', commentRoutes);
+app.use('/user', userRoutes);
 
-// Start server
-(async () => {
+// Connect to the database and sync models
+async function startServer() {
     try {
+        await sequelize.authenticate();
         await sequelize.sync();
-        app.listen(process.env.PORT, () => {
-            console.log(`Server listening on port ${process.env.PORT}`);
+        console.log(`Database connection has been established successfully at ${process.env.DB_HOST}:${process.env.DB_PORT}`);
+
+        // Start the server
+        const HOST = process.env.HOST || '0.0.0.0';
+        const PORT = process.env.PORT || 3000;
+        app.list(PORT, () => {
+            console.log(`Server is running on http://${HOST}:${PORT}`);
         });
     } catch (err) {
-        console.log(`Server failed to start: ${err}`);
+        console.error('Unable to connect to the database:', err);
     }
-});
+}
+
+// Start the server
+startServer();
