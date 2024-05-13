@@ -1,0 +1,17 @@
+<div class="card">
+    <div class="card-header d-flex flex-direction-row justify-content-between">
+        <div class="post-title my-auto">
+            {{title}}
+        </div>
+        <div class="user-info my-auto">
+            Posted by {{user.username}} on {{format_date created_date}}
+        </div>
+    </div>
+    <div class="card-body">
+        {{content}}
+        <br>
+        <div class="d-flex justify-content-end text-secondary small">
+            Comments: {{comments.length}}
+        </div>
+    </div>
+</div>

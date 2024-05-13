@@ -1,0 +1,12 @@
+{{#each this}}
+	<div class="comment-card">
+		<div class="card-header d-flex flex-direction-row justify-content-between">
+			<div class="user-info my-auto">
+				Commented by {{user.username}} on {{format_date created_date}}
+			</div>
+		</div>
+		<div class="card-body comment-body">
+			{{content}}
+		</div>
+	</div>
+{{/each}}

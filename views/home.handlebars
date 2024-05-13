@@ -1,0 +1,15 @@
+<div>
+    <h3 class="my-4 text-light mb-0">Home</h3>
+</div>
+
+{{#if posts.length}}
+    {{#each posts as |post|}}
+        <a href="/post/{{id}}" class="container w-100">
+            {{> posts post}}
+        </a>
+    {{/each}}
+{{else}}
+    <div>
+        <h5  class="my-5">No posts to show!</h5>
+    </div>
+{{/if}}

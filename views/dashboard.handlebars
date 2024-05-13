@@ -1,0 +1,19 @@
+<div>
+    <h3 class="my-4 text-light">My Dashboard</h3>
+</div>
+
+<a href="/dashboard/addPost"><button id="add-post-btn" class="button">+ New Post</button></a>
+
+{{#if posts.length}}
+    <div class="container">
+        {{#each posts as |post|}}
+            <a href="/dashboard/update/{{post.id}}" class="container w-100">
+                {{> posts post}}
+            </a>
+        {{/each}}
+    </div>
+{{else}}
+    <div>
+        <h5 class="my-5">You don't have any posts yet! Click the "New Post" button to get started.</h5>
+    </div>
+{{/if}}
